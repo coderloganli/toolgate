@@ -57,7 +57,7 @@ public class ToolGateDbContext(DbContextOptions<ToolGateDbContext> options) : Db
                     v => SerializeRules(v),
                     v => DeserializeRules(v),
                     new ValueComparer<List<ParameterRule>>(
-                        (a, b) => SerializeRules(a) == SerializeRules(b),
+                        (a, b) => SerializeRules(a!) == SerializeRules(b!),
                         v => SerializeRules(v).GetHashCode(),
                         v => DeserializeRules(SerializeRules(v))))
                 .HasColumnName("parameters_json")
