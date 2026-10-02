@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gateway:
+    name: Gateway (.NET build and test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet restore ToolGate.slnx
+      - run: dotnet build ToolGate.slnx --no-restore -c Release
+      - run: dotnet test ToolGate.slnx --no-build -c Release --logger "trx;LogFileName=results.trx"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results
+          path: tests/**/TestResults/*.trx
+
+  console:
+    name: Console (typecheck and build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: console
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: console/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  image:
+    name: Container image
+    runs-on: ubuntu-latest
+    needs: gateway
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t toolgate-api:${{ github.sha }} .

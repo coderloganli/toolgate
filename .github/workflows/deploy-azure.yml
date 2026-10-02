@@ -1,0 +1,30 @@
+# Manual deployment to Azure Container Apps. Authentication uses OpenID Connect federation, so no secrets
+# are stored in the repository. See deploy/azure/README.md for the one-time setup.
+name: Deploy to Azure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Build image in Azure Container Registry
+        run: az acr build --registry "${{ vars.AZURE_ACR_NAME }}" --image "toolgate-api:${{ github.sha }}" .
+      - name: Roll out new revision
+        run: >
+          az containerapp update
+          --name "${{ vars.AZURE_CONTAINERAPP_NAME }}"
+          --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}"
+          --image "${{ vars.AZURE_ACR_NAME }}.azurecr.io/toolgate-api:${{ github.sha }}"

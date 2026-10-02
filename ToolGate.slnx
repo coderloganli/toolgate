@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ToolGate.Api/ToolGate.Api.csproj" />
+    <Project Path="src/ToolGate.Core/ToolGate.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ToolGate.Tests/ToolGate.Tests.csproj" />
+  </Folder>
+</Solution>

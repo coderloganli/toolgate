@@ -1,0 +1,6 @@
+**/bin
+**/obj
+**/node_modules
+console/dist
+.git
+.github
